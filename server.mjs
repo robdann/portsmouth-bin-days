@@ -7,7 +7,7 @@ app.use(express.json());
 
 app.get('/data', async (req, res) => {
     const {postCode, firstLine} = req.query;
-    const browser = await chromium.launch({headless: false});
+    const browser = await chromium.launch({headless: true});
     try {
         const page = await browser.newPage();
         await page.goto('https://my.portsmouth.gov.uk/en/AchieveForms/?form_uri=sandbox-publish://AF-Process-26e27e70-f771-47b1-a34d-af276075cede/AF-Stage-cd7cc291-2e59-42cc-8c3f-1f93e132a2c9/definition.json&redirectlink=%2Fen&cancelRedirectLink=%2Fen');
