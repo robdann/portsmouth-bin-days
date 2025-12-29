@@ -1,5 +1,5 @@
 import express from 'express';
-import {chromium} from "playwright";
+import {chromium} from "playwright-core";
 
 const app = express();
 
