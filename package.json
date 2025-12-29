@@ -1,0 +1,13 @@
+{
+  "name": "portsmouth-bin-days",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npx playwright-core install --with-deps chromium",
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "express": "5.0.0",
+    "playwright": "^1.57.0"
+  }
+}
