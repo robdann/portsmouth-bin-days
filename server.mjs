@@ -5,8 +5,9 @@ const app = express();
 
 app.use(express.json());
 
-app.get('/data', async (req, res) => {
-    const {postCode, firstLine} = req.query;
+const cache = new Map();
+
+async function extraBinData(postCode, firstLine) {
     const browser = await chromium.launch({headless: true});
     try {
         const page = await browser.newPage();
@@ -28,9 +29,21 @@ app.get('/data', async (req, res) => {
         await page.waitForLoadState('networkidle');
         const rubbish = await frameLocator.locator('h4:has-text("Rubbish - next 10 collection dates") + p').innerText().then(t => t.split('\n').find(l => l.trim()));
         const recycling = await frameLocator.locator('h4:has-text("Recycling - next 10 collection dates") + p').innerText().then(t => t.split('\n').find(l => l.trim()));
-        res.json({postCode, firstLine, rubbish, recycling})
+        return {postCode, firstLine, rubbish, recycling};
     } finally {
         await browser.close();
+    }
+}
+
+app.get('/data', async (req, res) => {
+    const {postCode, firstLine} = req.query;
+    const key = postCode + "-" + firstLine;
+    if (cache[key]) {
+        res.json(cache[key]);
+    } else {
+        const result = await extraBinData(postCode, firstLine);
+        cache.set(key, result);
+        res.json(result);
     }
 });
 app.listen(process.env.PORT || 3000, () => {
