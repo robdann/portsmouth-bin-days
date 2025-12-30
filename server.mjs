@@ -7,6 +7,32 @@ app.use(express.json());
 
 const cache = new Map();
 
+function parseBinDate(binString) {
+    if (!binString) return null;
+
+    // Remove trailing asterisk if present
+    const cleanStr = binString.replace('*', '').trim();
+
+    // Remove the weekday at the start (e.g., "Tuesday")
+    // Split on first space after the weekday
+    const parts = cleanStr.split(' ');
+    if (parts.length < 3) return null;
+
+    // Take day, month, year only
+    const day = parts[1];
+    const month = parts[2];
+    const year = parts[3];
+
+    // Build a string like "30 December 2025"
+    const dateStr = `${day} ${month} ${year}`;
+
+    // Parse using Date
+    const date = new Date(dateStr);
+
+    // Return ISO string (YYYY-MM-DD)
+    return date.toISOString().split('T')[0];
+}
+
 async function extraBinData(postCode, firstLine) {
     const browser = await chromium.launch({headless: true});
     try {
@@ -29,7 +55,7 @@ async function extraBinData(postCode, firstLine) {
         await page.waitForLoadState('networkidle');
         const rubbish = await frameLocator.locator('h4:has-text("Rubbish - next 10 collection dates") + p').innerText().then(t => t.split('\n').find(l => l.trim()));
         const recycling = await frameLocator.locator('h4:has-text("Recycling - next 10 collection dates") + p').innerText().then(t => t.split('\n').find(l => l.trim()));
-        return {postCode, firstLine, rubbish, recycling};
+        return {postCode, firstLine, rubbish: parseBinDate(rubbish), recycling: parseBinDate(recycling)};
     } finally {
         await browser.close();
     }
