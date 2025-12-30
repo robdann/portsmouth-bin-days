@@ -38,8 +38,8 @@ async function extraBinData(postCode, firstLine) {
 app.get('/data', async (req, res) => {
     const {postCode, firstLine} = req.query;
     const key = postCode + "-" + firstLine;
-    if (cache[key]) {
-        res.json(cache[key]);
+    if (cache.has(key)) {
+        res.json(cache.get(key));
     } else {
         const result = await extraBinData(postCode, firstLine);
         cache.set(key, result);
